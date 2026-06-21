@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ALL-IN-ONE 멀티 분할 검색창</title>
     
-    <!-- 브라우저 탭에 올인원 로고가 뜨도록 설정하는 코드 -->
     <link rel="icon" href="logo.png" type="image/png">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -42,7 +41,7 @@
             gap: 15px;
         }
 
-        /* 올인원 로고 컨테이너 */
+        /* 올인원 로고 컨테이너 및 크기 조절 */
         .logo-container {
             display: flex;
             justify-content: center;
@@ -51,7 +50,6 @@
             user-select: none;
         }
 
-        /* ✨ image_72dd05.png 대비 가독성을 높이기 위해 로고 크기를 적당히 확대 (65px -> 110px) */
         .brand-logo {
             height: 110px;
             width: auto;
@@ -205,17 +203,59 @@
             display: block;
         }
 
+        /* 💡 보안 차단 시 안내 메시지와 새 창 열기 버튼 스타일 */
         .frame-wrapper {
             flex: 1;
             width: 100%;
             height: 100%;
+            position: relative;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .go-to-portal-btn {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            display: none; /* 검색 전에는 숨김 */
+        }
+        
+        .go-to-portal-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-naver { background-color: #03cf5d; }
+        .btn-youtube { background-color: #ff0000; }
+        .btn-google { background-color: #4285f4; }
+        .btn-gemini { background-color: #7a5af8; }
+
+        .notice-text {
+            color: #666;
+            font-size: 13px;
+            text-align: center;
+            line-height: 1.5;
+            padding: 0 20px;
         }
 
         iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             border: none;
             background: #ffffff;
+            z-index: 1;
         }
     </style>
 </head>
@@ -236,8 +276,6 @@
             </form>
 
             <div class="portal-selector">
-                
-                <!-- 네이버 제어 -->
                 <div class="portal-control-card">
                     <div class="info-row"><i class="fa-solid fa-square-n naver-theme portal-icon"></i> <span>네이버</span></div>
                     <div class="btn-group">
@@ -246,7 +284,6 @@
                     </div>
                 </div>
 
-                <!-- 유튜브 제어 -->
                 <div class="portal-control-card">
                     <div class="info-row"><i class="fa-brands fa-youtube youtube-theme portal-icon"></i> <span>유튜브</span></div>
                     <div class="btn-group">
@@ -255,7 +292,6 @@
                     </div>
                 </div>
 
-                <!-- 구글 제어 -->
                 <div class="portal-control-card">
                     <div class="info-row"><i class="fa-brands fa-google google-theme portal-icon"></i> <span>구글</span></div>
                     <div class="btn-group">
@@ -264,7 +300,6 @@
                     </div>
                 </div>
 
-                <!-- 제미나이 제어 -->
                 <div class="portal-control-card">
                     <div class="info-row"><i class="fa-solid fa-wand-magic-sparkles gemini-theme portal-icon"></i> <span>제미나이</span></div>
                     <div class="btn-group">
@@ -272,53 +307,55 @@
                         <button type="button" class="action-btn lock-btn" id="lock-gemini" onclick="toggleLock('gemini')"><i class="fa-solid fa-lock-open"></i> 해제</button>
                     </div>
                 </div>
-
             </div>
 
         </div>
 
         <div id="searchResults" class="results-container">
-            <!-- 네이버 -->
             <div id="naverCard" class="result-card">
                 <div class="card-header naver">
                     <i class="fa-solid fa-square-n"></i> <span>NAVER</span>
                     <span class="lock-indicator"><i class="fa-solid fa-lock"></i> 고정됨</span>
                 </div>
                 <div class="frame-wrapper">
+                    <div class="notice-text">보안 정책으로 화면이 보이지 않는 경우<br>아래 버튼을 누르면 검색 결과로 바로 이동합니다!</div>
+                    <button class="go-to-portal-btn btn-naver" id="btnNaver" onclick="openPortal('naver')">네이버에서 검색결과 보기</button>
                     <iframe id="naverFrame" src="about:blank"></iframe>
                 </div>
             </div>
 
-            <!-- 유튜브 -->
             <div id="youtubeCard" class="result-card">
                 <div class="card-header youtube">
                     <i class="fab fa-youtube"></i> <span>YOUTUBE</span>
                     <span class="lock-indicator"><i class="fa-solid fa-lock"></i> 고정됨</span>
                 </div>
                 <div class="frame-wrapper">
+                    <div class="notice-text">보안 정책으로 화면이 보이지 않는 경우<br>아래 버튼을 누르면 검색 결과로 바로 이동합니다!</div>
+                    <button class="go-to-portal-btn btn-youtube" id="btnYoutube" onclick="openPortal('youtube')">유튜브에서 검색결과 보기</button>
                     <iframe id="youtubeFrame" src="about:blank"></iframe>
                 </div>
             </div>
 
-            <!-- 구글 -->
             <div id="googleCard" class="result-card">
                 <div class="card-header google">
                     <i class="fab fa-google"></i> <span>GOOGLE</span>
                     <span class="lock-indicator"><i class="fa-solid fa-lock"></i> 고정됨</span>
                 </div>
                 <div class="frame-wrapper">
+                    <div class="notice-text">보안 정책으로 화면이 보이지 않는 경우<br>아래 버튼을 누르면 검색 결과로 바로 이동합니다!</div>
+                    <button class="go-to-portal-btn btn-google" id="btnGoogle" onclick="openPortal('google')">구글에서 검색결과 보기</button>
                     <iframe id="googleFrame" src="about:blank"></iframe>
                 </div>
             </div>
 
-            <!-- 제미나이 -->
             <div id="geminiCard" class="result-card">
                 <div class="card-header gemini">
                     <i class="fa-solid fa-wand-magic-sparkles"></i> <span>GEMINI</span>
                     <span class="lock-indicator"><i class="fa-solid fa-lock"></i> 고정됨</span>
                 </div>
                 <div class="frame-wrapper">
-                    <iframe id="geminiFrame" src="https://gemini.google.com/app"></iframe>
+                    <div class="notice-text">제미나이는 외부 차단 보안 정책으로 인해<br>아래 버튼을 통해 전용 창에서 검색이 진행됩니다!</div>
+                    <button class="go-to-portal-btn btn-gemini" id="btnGemini" style="display:block;" onclick="openPortal('gemini')">Gemini 열기</button>
                 </div>
             </div>
         </div>
@@ -332,9 +369,10 @@
             gemini: { on: true, locked: false }
         };
 
+        let currentQuery = "";
+
         function toggleOnOff(portal) {
             portalStatus[portal].on = !portalStatus[portal].on;
-            
             const btn = event.currentTarget;
             const card = document.getElementById(`${portal}Card`);
 
@@ -351,7 +389,6 @@
 
         function toggleLock(portal) {
             portalStatus[portal].locked = !portalStatus[portal].locked;
-            
             const btn = document.getElementById(`lock-${portal}`);
             const card = document.getElementById(`${portal}Card`);
 
@@ -366,6 +403,17 @@
             }
         }
 
+        // 🔗 버튼 클릭 시 각 사이트로 바로 넘겨주는 함수
+        function openPortal(portal) {
+            const query = document.getElementById('searchInput').value.trim() || currentQuery;
+            const encodedQuery = encodeURIComponent(query);
+            
+            if(portal === 'naver') window.open(`https://search.naver.com/search.naver?query=${encodedQuery}`, '_blank');
+            if(portal === 'youtube') window.open(`https://www.youtube.com/results?search_query=${encodedQuery}`, '_blank');
+            if(portal === 'google') window.open(`https://www.google.com/search?q=${encodedQuery}`, '_blank');
+            if(portal === 'gemini') window.open(`https://gemini.google.com/app?q=${encodedQuery}`, '_blank');
+        }
+
         document.getElementById('searchForm').addEventListener('submit', function(event) {
             event.preventDefault(); 
             
@@ -374,23 +422,24 @@
                 alert('검색어를 입력해주세요!');
                 return;
             }
-            
+            currentQuery = query;
             const encodedQuery = encodeURIComponent(query);
             
+            // 검색 버튼 활성화 및 iframe 호출
             if (portalStatus.naver.on && !portalStatus.naver.locked) {
-                document.getElementById('naverFrame').src = `https://search.naver.com/search.naver?query=${encodedQuery}`;
+                document.getElementById('btnNaver').style.display = 'block';
+                document.getElementById('naverFrame').src = `https://m.search.naver.com/search.naver?query=${encodedQuery}`;
             }
-            
             if (portalStatus.youtube.on && !portalStatus.youtube.locked) {
-                document.getElementById('youtubeFrame').src = `https://www.youtube.com/results?search_query=${encodedQuery}`;
+                document.getElementById('btnYoutube').style.display = 'block';
+                document.getElementById('youtubeFrame').src = `https://www.youtube.com/embed?listType=search&list=${encodedQuery}`;
             }
-            
             if (portalStatus.google.on && !portalStatus.google.locked) {
+                document.getElementById('btnGoogle').style.display = 'block';
                 document.getElementById('googleFrame').src = `https://www.google.com/search?igu=1&q=${encodedQuery}`;
             }
-
             if (portalStatus.gemini.on && !portalStatus.gemini.locked) {
-                document.getElementById('geminiFrame').src = `https://gemini.google.com/app?q=${encodedQuery}`;
+                window.open(`https://gemini.google.com/app?q=${encodedQuery}`, '_blank');
             }
         });
     </script>
