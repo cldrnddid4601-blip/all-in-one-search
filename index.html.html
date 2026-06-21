@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALL-IN-ONE 멀티 분할 검색창</title>
+    
+    <!-- 브라우저 탭에 올인원 로고가 뜨도록 설정하는 코드 -->
+    <link rel="icon" href="logo.png" type="image/png">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f6f8fa;
+            color: #1a1a1a;
+            min-height: 100vh;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .main-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 30px);
+        }
+
+        .search-header {
+            text-align: center;
+            margin: 5px 0 15px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* 올인원 로고 컨테이너 */
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 5px;
+            user-select: none;
+        }
+
+        /* ✨ image_72dd05.png 대비 가독성을 높이기 위해 로고 크기를 적당히 확대 (65px -> 110px) */
+        .brand-logo {
+            height: 110px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* 검색창 디자인 */
+        .search-form {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 680px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1.5px solid #1a1a1a;
+            border-radius: 50px;
+            padding: 10px 24px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .search-form input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 17px;
+            font-weight: 500;
+            background: transparent;
+        }
+
+        .search-button {
+            background: none;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        /* 컨트롤 패널 영역 */
+        .portal-selector {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .portal-control-card {
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            border: 1.5px solid #e1e4e8;
+            border-radius: 14px;
+            padding: 8px 12px;
+            min-width: 120px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            gap: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 700;
+            color: #444;
+        }
+
+        .info-row i.portal-icon {
+            font-size: 16px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #f8f9fa;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .naver-theme { color: #03cf5d; }
+        .youtube-theme { color: #ff0000; }
+        .google-theme { color: #4285f4; }
+        .gemini-theme { color: #7a5af8; }
+
+        .action-btn.on-btn.active { background-color: #2f3542; color: #fff; border-color: #2f3542; }
+        .action-btn.lock-btn.locked { background-color: #ff4757; color: #fff; border-color: #ff4757; }
+
+        /* 하단 결과창 분할 영역 */
+        .results-container {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+            height: 100%;
+            width: 100%;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .result-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #e1e4e8;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card-header {
+            padding: 11px;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-align: center;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            position: relative;
+        }
+        .card-header.naver { background-color: #03cf5d; }
+        .card-header.youtube { background-color: #ff0000; }
+        .card-header.google { background-color: #4285f4; }
+        .card-header.gemini { background-color: #7a5af8; }
+
+        .lock-indicator {
+            position: absolute;
+            right: 15px;
+            font-size: 12px;
+            display: none;
+        }
+        .result-card.is-locked .lock-indicator {
+            display: block;
+        }
+
+        .frame-wrapper {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+        <div class="search-header">
+            
+            <div class="logo-container">
+                <img src="logo.png" alt="ALL-S" class="brand-logo">
+            </div>
+            
+            <form id="searchForm" class="search-form">
+                <input type="text" id="searchInput" placeholder="원하는 로그를 선택하고 검색해보세요..." autocomplete="off">
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+
+            <div class="portal-selector">
+                
+                <!-- 네이버 제어 -->
+                <div class="portal-control-card">
+                    <div class="info-row"><i class="fa-solid fa-square-n naver-theme portal-icon"></i> <span>네이버</span></div>
+                    <div class="btn-group">
+                        <button type="button" class="action-btn on-btn active" onclick="toggleOnOff('naver')"><i class="fa-solid fa-power-off"></i> On</button>
+                        <button type="button" class="action-btn lock-btn" id="lock-naver" onclick="toggleLock('naver')"><i class="fa-solid fa-lock-open"></i> 해제</button>
+                    </div>
+                </div>
+
+                <!-- 유튜브 제어 -->
+                <div class="portal-control-card">
+                    <div class="info-row"><i class="fa-brands fa-youtube youtube-theme portal-icon"></i> <span>유튜브</span></div>
+                    <div class="btn-group">
+                        <button type="button" class="action-btn on-btn active" onclick="toggleOnOff('youtube')"><i class="fa-solid fa-power-off"></i> On</button>
+                        <button type="button" class="action-btn lock-btn" id="lock-youtube" onclick="toggleLock('youtube')"><i class="fa-solid fa-lock-open"></i> 해제</button>
+                    </div>
+                </div>
+
+                <!-- 구글 제어 -->
+                <div class="portal-control-card">
+                    <div class="info-row"><i class="fa-brands fa-google google-theme portal-icon"></i> <span>구글</span></div>
+                    <div class="btn-group">
+                        <button type="button" class="action-btn on-btn active" onclick="toggleOnOff('google')"><i class="fa-solid fa-power-off"></i> On</button>
+                        <button type="button" class="action-btn lock-btn" id="lock-google" onclick="toggleLock('google')"><i class="fa-solid fa-lock-open"></i> 해제</button>
+                    </div>
+                </div>
+
+                <!-- 제미나이 제어 -->
+                <div class="portal-control-card">
+                    <div class="info-row"><i class="fa-solid fa-wand-magic-sparkles gemini-theme portal-icon"></i> <span>제미나이</span></div>
+                    <div class="btn-group">
+                        <button type="button" class="action-btn on-btn active" onclick="toggleOnOff('gemini')"><i class="fa-solid fa-power-off"></i> On</button>
+                        <button type="button" class="action-btn lock-btn" id="lock-gemini" onclick="toggleLock('gemini')"><i class="fa-solid fa-lock-open"></i> 해제</button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="searchResults" class="results-container">
+            <!-- 네이버 -->
+            <div id="naverCard" class="result-card">
+                <div class="card-header naver">
+                    <i class="fa-solid fa-square-n"></i> <span>NAVER</span>
+                    <span class="lock-indicator"><i class="fa-solid fa-lock"></i> 고정됨</span>
+                </div>
+                <div class="frame-wrapper">
+                    <iframe id="naverFrame" src="about:blank"></iframe>
+                </div>
+            </div>
+
+            <!-- 유튜브 -->
+            <div id="youtubeCard" class="result-card">
+                <div class="card-header youtube">
+                    <i class="fab fa-youtube"></i> <span>YOUTUBE</span>
+                    <span class="lock-indicator"><i class="fa-solid fa-lock"></i> 고정됨</span>
+                </div>
+                <div class="frame-wrapper">
+                    <iframe id="youtubeFrame" src="about:blank"></iframe>
+                </div>
+            </div>
+
+            <!-- 구글 -->
+            <div id="googleCard" class="result-card">
+                <div class="card-header google">
+                    <i class="fab fa-google"></i> <span>GOOGLE</span>
+                    <span class="lock-indicator"><i class="fa-solid fa-lock"></i> 고정됨</span>
+                </div>
+                <div class="frame-wrapper">
+                    <iframe id="googleFrame" src="about:blank"></iframe>
+                </div>
+            </div>
+
+            <!-- 제미나이 -->
+            <div id="geminiCard" class="result-card">
+                <div class="card-header gemini">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span>GEMINI</span>
+                    <span class="lock-indicator"><i class="fa-solid fa-lock"></i> 고정됨</span>
+                </div>
+                <div class="frame-wrapper">
+                    <iframe id="geminiFrame" src="https://gemini.google.com/app"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const portalStatus = {
+            naver: { on: true, locked: false },
+            youtube: { on: true, locked: false },
+            google: { on: true, locked: false },
+            gemini: { on: true, locked: false }
+        };
+
+        function toggleOnOff(portal) {
+            portalStatus[portal].on = !portalStatus[portal].on;
+            
+            const btn = event.currentTarget;
+            const card = document.getElementById(`${portal}Card`);
+
+            if (portalStatus[portal].on) {
+                btn.classList.add('active');
+                btn.innerHTML = `<i class="fa-solid fa-power-off"></i> On`;
+                card.classList.remove('hidden');
+            } else {
+                btn.classList.remove('active');
+                btn.innerHTML = `<i class="fa-solid fa-power-off"></i> Off`;
+                card.classList.add('hidden');
+            }
+        }
+
+        function toggleLock(portal) {
+            portalStatus[portal].locked = !portalStatus[portal].locked;
+            
+            const btn = document.getElementById(`lock-${portal}`);
+            const card = document.getElementById(`${portal}Card`);
+
+            if (portalStatus[portal].locked) {
+                btn.classList.add('locked');
+                btn.innerHTML = `<i class="fa-solid fa-lock"></i> 고정`;
+                card.classList.add('is-locked');
+            } else {
+                btn.classList.remove('locked');
+                btn.innerHTML = `<i class="fa-solid fa-lock-open"></i> 해제`;
+                card.classList.remove('is-locked');
+            }
+        }
+
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            event.preventDefault(); 
+            
+            const query = document.getElementById('searchInput').value.trim();
+            if (query === '') {
+                alert('검색어를 입력해주세요!');
+                return;
+            }
+            
+            const encodedQuery = encodeURIComponent(query);
+            
+            if (portalStatus.naver.on && !portalStatus.naver.locked) {
+                document.getElementById('naverFrame').src = `https://search.naver.com/search.naver?query=${encodedQuery}`;
+            }
+            
+            if (portalStatus.youtube.on && !portalStatus.youtube.locked) {
+                document.getElementById('youtubeFrame').src = `https://www.youtube.com/results?search_query=${encodedQuery}`;
+            }
+            
+            if (portalStatus.google.on && !portalStatus.google.locked) {
+                document.getElementById('googleFrame').src = `https://www.google.com/search?igu=1&q=${encodedQuery}`;
+            }
+
+            if (portalStatus.gemini.on && !portalStatus.gemini.locked) {
+                document.getElementById('geminiFrame').src = `https://gemini.google.com/app?q=${encodedQuery}`;
+            }
+        });
+    </script>
+</body>
+</html>
